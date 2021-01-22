@@ -132,15 +132,17 @@ public struct WebImage : View {
         // Fix the SwiftUI.Image rendering issue, like when use EXIF UIImage, the `.aspectRatio` does not works. SwiftUI's Bug :)
         // See issue #101
         var cgImage: CGImage?
+        
+        var scale = image.scale
         // Case 1: Vector Image, draw bitmap image
         if image.sd_isVector {
             // ensure CGImage is nil
             if image.cgImage == nil {
                 // draw vector into bitmap with the screen scale (behavior like AppKit)
                 #if os(iOS) || os(tvOS)
-                let scale = UIScreen.main.scale
+                scale = UIScreen.main.scale
                 #else
-                let scale = WKInterfaceDevice.current().screenScale
+                scale = WKInterfaceDevice.current().screenScale
                 #endif
                 UIGraphicsBeginImageContextWithOptions(image.size, false, scale)
                 image.draw(at: .zero)
@@ -156,7 +158,6 @@ public struct WebImage : View {
         }
         // If we have CGImage, use CGImage based API, else use UIImage based API
         if let cgImage = cgImage {
-            let scale = image.scale
             let orientation = image.imageOrientation.toSwiftUI
             result = Image(decorative: cgImage, scale: scale, orientation: orientation)
         } else {
